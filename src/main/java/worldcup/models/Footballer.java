@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import worldcup.util.dto.FootballerDTO;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "footballer")
 public class Footballer {
@@ -82,5 +84,18 @@ public class Footballer {
             representation.getFootballers().add(this);
         }
         this.representation = representation;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Footballer that = (Footballer) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

@@ -6,6 +6,7 @@ import worldcup.util.dto.RepresentationDTO;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "representation")
@@ -99,5 +100,18 @@ public class Representation {
             footballer.setRepresentation(this);
         }
         this.footballers.add(footballer);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Representation that = (Representation) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
