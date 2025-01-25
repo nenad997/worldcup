@@ -9,11 +9,13 @@ import java.lang.reflect.Field;
 public class FieldMatchValidator implements ConstraintValidator<FieldMatch, Object> {
     private String firstFieldName;
     private String secondFieldName;
+    private String message;
 
     @Override
     public void initialize(FieldMatch constraintAnnotation) {
         this.firstFieldName = constraintAnnotation.first();
         this.secondFieldName = constraintAnnotation.second();
+        this.message = constraintAnnotation.message();
     }
 
     @Override
@@ -28,8 +30,20 @@ public class FieldMatchValidator implements ConstraintValidator<FieldMatch, Obje
             Object firstValue = firstField.get(o);
             Object secondValue = secondField.get(o);
 
-            return firstValue != null && firstValue.equals(secondValue);
-        } catch (Exception e) {
+            boolean isValid = firstValue != null && firstValue.equals(secondValue);
+
+            if (!isValid) {
+
+                constraintValidatorContext.disableDefaultConstraintViolation();
+
+                constraintValidatorContext.buildConstraintViolationWithTemplate(message)
+                        .addPropertyNode(secondFieldName)
+                        .addConstraintViolation();
+            }
+
+            return isValid;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
             return false;
         }
     }

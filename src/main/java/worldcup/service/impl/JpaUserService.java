@@ -6,8 +6,6 @@ import worldcup.models.User;
 import worldcup.repository.UserRepository;
 import worldcup.service.UserService;
 
-import java.util.Optional;
-
 @Service
 public class JpaUserService implements UserService {
     private final UserRepository repository;
