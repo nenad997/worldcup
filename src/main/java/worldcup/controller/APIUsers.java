@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,10 +20,12 @@ import worldcup.util.dto.UserLoginDTO;
 @RequestMapping(value = "/api/auth")
 public class APIUsers {
     private final UserService service;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public APIUsers(UserService service) {
+    public APIUsers(UserService service, PasswordEncoder passwordEncoder) {
         this.service = service;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/signup")
@@ -41,6 +44,14 @@ public class APIUsers {
         }
 
         User user = new User(dto);
+
+        String hashedPassword = passwordEncoder.encode(user.getPassword());
+
+        if (hashedPassword == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to store password");
+        }
+
+        user.setPassword(hashedPassword);
 
         User savedUser = service.save(user);
 
