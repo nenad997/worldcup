@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import worldcup.models.Representation;
@@ -43,10 +44,14 @@ public class APIRepresentations {
     }
 
     @PostMapping
-    public ResponseEntity<Representation> addRepresentation(
+    public ResponseEntity<?> addRepresentation(
             @Valid
             @RequestBody
-            RepresentationDTO dto) {
+            RepresentationDTO dto,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(result.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
 
         Representation savedRepresentation = service.save(new Representation(dto));
 

@@ -23,7 +23,9 @@ public class APIUsers {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public APIUsers(UserService service, PasswordEncoder passwordEncoder) {
+    public APIUsers(
+            UserService service,
+            PasswordEncoder passwordEncoder) {
         this.service = service;
         this.passwordEncoder = passwordEncoder;
     }
@@ -72,6 +74,12 @@ public class APIUsers {
 
         if (foundUser == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this email address does not exist!");
+        }
+
+        boolean doPasswordsMatch = passwordEncoder.matches(dto.getPassword(), foundUser.getPassword());
+
+        if (!doPasswordsMatch) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid password, please try again!");
         }
 
         return null;

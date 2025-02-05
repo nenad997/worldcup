@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import worldcup.models.Footballer;
@@ -59,10 +60,15 @@ public class APIFootballers {
     }
 
     @PostMapping
-    public ResponseEntity<Footballer> addFootballer(
+    public ResponseEntity<?> addFootballer(
             @Valid
             @RequestBody
-            FootballerDTO dto) {
+            FootballerDTO dto,
+            BindingResult result) {
+
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(result.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
 
         Footballer savedFootballer = service.save(new Footballer(dto));
 
@@ -70,11 +76,16 @@ public class APIFootballers {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Footballer> editFootballer(
+    public ResponseEntity<?> editFootballer(
             @PathVariable
             Long id,
             @Valid
-            @RequestBody FootballerDTO dto) {
+            @RequestBody FootballerDTO dto,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            return new ResponseEntity<>(result.getAllErrors(), HttpStatus.BAD_REQUEST);
+        }
+
         Footballer foundFootballer = service.findOneById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Footballer with id " + id + " not found!"));
 
