@@ -34,8 +34,14 @@ public class JpaFootballerService implements FootballerService {
     }
 
     @Override
-    public Optional<Footballer> findOneById(Long id) {
-        return repository.findById(id);
+    public Footballer findOneById(Long id) {
+        Optional<Footballer> foundFootballer = repository.findById(id);
+
+        if (foundFootballer.isEmpty()) {
+            throw new IllegalArgumentException("Footballer with id " + id + " not found!");
+        }
+
+        return repository.findById(id).isPresent() ? repository.findById(id).get() : null;
     }
 
     @Override
@@ -45,21 +51,31 @@ public class JpaFootballerService implements FootballerService {
 
     @Override
     public Footballer edit(Long id, Footballer footballer) {
-        Footballer foundFootballer = repository.getReferenceById(id);
+        Optional<Footballer> foundFootballer = repository.findById(id);
 
-        foundFootballer.setFullName(footballer.getFullName());
-        foundFootballer.setYearOfBirth(footballer.getYearOfBirth());
-        foundFootballer.setNumberOfMatchesForRepresentation(footballer.getNumberOfMatchesForRepresentation());
-        foundFootballer.setRepresentation(footballer.getRepresentation());
+        if (foundFootballer.isEmpty()) {
+            throw new IllegalArgumentException("You are trying to edit footballer which does not exist!");
+        }
 
-        return repository.save(foundFootballer);
+        Footballer toEdit = foundFootballer.get();
+
+        toEdit.setFullName(footballer.getFullName());
+        toEdit.setYearOfBirth(footballer.getYearOfBirth());
+        toEdit.setNumberOfMatchesForRepresentation(footballer.getNumberOfMatchesForRepresentation());
+        toEdit.setRepresentation(footballer.getRepresentation());
+
+        return repository.save(toEdit);
     }
 
     @Override
-    public Footballer delete(Long id) {
-        Footballer foundFootballer = repository.getReferenceById(id);
+    public boolean delete(Long id) {
+        Optional<Footballer> foundFootballer = repository.findById(id);
 
-        repository.deleteById(foundFootballer.getId());
-        return foundFootballer;
+        if (foundFootballer.isEmpty()) {
+            throw new IllegalArgumentException("You are trying to delete footballer which does not exist!");
+        }
+
+        repository.deleteById(foundFootballer.get().getId());
+        return true;
     }
 }

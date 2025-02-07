@@ -29,8 +29,14 @@ public class JpaRepresentationService implements RepresentationService {
     }
 
     @Override
-    public Optional<Representation> findOneById(Long id) {
-        return repository.findById(id);
+    public Representation findOneById(Long id) {
+        Optional<Representation> foundRepresentation = repository.findById(id);
+
+        if (foundRepresentation.isEmpty()) {
+            throw new IllegalArgumentException("Representation with id " + id + " not found!");
+        }
+
+        return repository.findById(id).isPresent() ? repository.findById(id).get() : null;
     }
 
     @Override
@@ -39,9 +45,14 @@ public class JpaRepresentationService implements RepresentationService {
     }
 
     @Override
-    public Representation delete(Long id) {
-        Representation foundRepresentation = repository.getReferenceById(id);
-        repository.deleteById(foundRepresentation.getId());
-        return foundRepresentation;
+    public boolean delete(Long id) {
+        Optional<Representation> foundRepresentation = repository.findById(id);
+
+        if (foundRepresentation.isEmpty()) {
+            throw new IllegalArgumentException("You are trying to delete representation which does not exist!");
+        }
+
+        repository.deleteById(foundRepresentation.get().getId());
+        return true;
     }
 }

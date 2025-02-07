@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import worldcup.models.Representation;
 import worldcup.service.RepresentationService;
 import worldcup.util.dto.RepresentationDTO;
@@ -37,8 +36,11 @@ public class APIRepresentations {
     public ResponseEntity<Representation> findOne(
             @PathVariable
             Long id) {
-        Representation foundRepresentation = service.findOneById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Representation with id " + id + "not found!"));
+        Representation foundRepresentation = service.findOneById(id);
+
+        if (foundRepresentation == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         return new ResponseEntity<>(foundRepresentation, HttpStatus.OK);
     }
@@ -62,11 +64,18 @@ public class APIRepresentations {
     public ResponseEntity<Representation> deleteRepresentation(
             @PathVariable
             Long id) {
-        Representation foundRepresentation = service.findOneById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The representation you are trying to delete does not exist!"));
+        Representation foundRepresentation = service.findOneById(id);
 
-        Representation deletedRepresentation = service.delete(foundRepresentation.getId());
+        if (foundRepresentation == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
-        return new ResponseEntity<>(deletedRepresentation, HttpStatus.OK);
+        boolean isDeleted = service.delete(foundRepresentation.getId());
+
+        if (!isDeleted) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

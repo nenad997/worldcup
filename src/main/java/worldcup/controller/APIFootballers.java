@@ -40,8 +40,11 @@ public class APIFootballers {
 
     @GetMapping("/{id}")
     public ResponseEntity<Footballer> findOne(@PathVariable Long id) {
-        Footballer foundFootballer = service.findOneById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Footballer with id " + id + " not found!"));
+        Footballer foundFootballer = service.findOneById(id);
+
+        if (foundFootballer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         return new ResponseEntity<>(foundFootballer, HttpStatus.OK);
     }
@@ -86,8 +89,11 @@ public class APIFootballers {
             return new ResponseEntity<>(result.getAllErrors(), HttpStatus.BAD_REQUEST);
         }
 
-        Footballer foundFootballer = service.findOneById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Footballer with id " + id + " not found!"));
+        Footballer foundFootballer = service.findOneById(id);
+
+        if (foundFootballer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         Footballer editedFootballer = service.edit(foundFootballer.getId(), new Footballer(dto));
 
@@ -96,11 +102,18 @@ public class APIFootballers {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Footballer> deleteFootballer(@PathVariable Long id) {
-        Footballer foundFootballer = service.findOneById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Footballer with id " + id + " not found!"));
+        Footballer foundFootballer = service.findOneById(id);
 
-        Footballer deletedFootballer = service.delete(foundFootballer.getId());
+        if (foundFootballer == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
-        return new ResponseEntity<>(deletedFootballer, HttpStatus.OK);
+        boolean isDeleted = service.delete(foundFootballer.getId());
+
+        if (!isDeleted) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
